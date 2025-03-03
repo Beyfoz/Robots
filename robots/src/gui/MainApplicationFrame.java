@@ -17,6 +17,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+
 import log.Logger;
 
 public class MainApplicationFrame extends JFrame {
@@ -141,6 +142,7 @@ public class MainApplicationFrame extends JFrame {
 
     /**
      * Метод для подтверждения выхода.
+     *
      * @return true, если пользователь подтвердил выход, false — если отменил.
      */
     private boolean confirmAndExit() {
