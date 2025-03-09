@@ -1,20 +1,11 @@
 package gui;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.JDesktopPane;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
@@ -22,6 +13,7 @@ import log.Logger;
 
 public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
+    private final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
     public MainApplicationFrame() {
         int inset = 50;
@@ -39,15 +31,19 @@ public class MainApplicationFrame extends JFrame {
         gameWindow.setSize(400, 400);
         addWindow(gameWindow);
 
-        setJMenuBar(generateMenuBar());
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // Изменено на DO_NOTHING_ON_CLOSE
+        setJMenuBar(new MenuBarFactory(this).createMenuBar());
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
                 if (confirmAndExit()) {
-                    System.exit(0); // Закрываем приложение, если пользователь подтвердил выход
+                    fireApplicationExitEvent();
                 }
             }
+        });
+
+        addApplicationExitListener(evt -> {
+            dispose();
         });
     }
 
@@ -65,87 +61,28 @@ public class MainApplicationFrame extends JFrame {
         desktopPane.add(frame);
         frame.setVisible(true);
 
-        // Добавляем InternalFrameListener к каждому окну
         frame.addInternalFrameListener(new InternalFrameAdapter() {
             @Override
             public void internalFrameClosing(InternalFrameEvent e) {
                 if (!confirmAndExit()) {
-                    // Если пользователь выбрал "Нет", отменяем закрытие окна
                     e.getInternalFrame().setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
                 } else {
-                    // Если пользователь выбрал "Да", закрываем окно
                     e.getInternalFrame().setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
                 }
             }
         });
     }
 
-    private JMenuBar generateMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-
-        JMenu fileMenu = new JMenu("Файл");
-        fileMenu.setMnemonic(KeyEvent.VK_F);
-
-        JMenuItem exitMenuItem = new JMenuItem("Выход", KeyEvent.VK_X);
-        exitMenuItem.addActionListener((event) -> {
-            if (confirmAndExit()) {
-                System.exit(0); // Закрываем приложение, если пользователь подтвердил выход
-            }
-        });
-        fileMenu.add(exitMenuItem);
-
-        JMenu lookAndFeelMenu = new JMenu("Режим отображения");
-        lookAndFeelMenu.setMnemonic(KeyEvent.VK_V);
-        lookAndFeelMenu.getAccessibleContext().setAccessibleDescription(
-                "Управление режимом отображения приложения");
-
-        JMenuItem systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
-        systemLookAndFeel.addActionListener((event) -> {
-            setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            this.invalidate();
-        });
-        lookAndFeelMenu.add(systemLookAndFeel);
-
-        JMenuItem crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_U);
-        crossplatformLookAndFeel.addActionListener((event) -> {
-            setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-            this.invalidate();
-        });
-        lookAndFeelMenu.add(crossplatformLookAndFeel);
-
-        JMenu testMenu = new JMenu("Тесты");
-        testMenu.setMnemonic(KeyEvent.VK_T);
-        testMenu.getAccessibleContext().setAccessibleDescription(
-                "Тестовые команды");
-
-        JMenuItem addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
-        addLogMessageItem.addActionListener((event) -> {
-            Logger.debug("Новая строка");
-        });
-        testMenu.add(addLogMessageItem);
-
-        menuBar.add(fileMenu);
-        menuBar.add(lookAndFeelMenu);
-        menuBar.add(testMenu);
-        return menuBar;
-    }
-
-    private void setLookAndFeel(String className) {
+    public void setLookAndFeel(String className) {
         try {
             UIManager.setLookAndFeel(className);
             SwingUtilities.updateComponentTreeUI(this);
         } catch (ClassNotFoundException | InstantiationException
                  | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            // just ignore
         }
     }
 
-    /**
-     * Метод для подтверждения выхода.
-     *
-     * @return true, если пользователь подтвердил выход, false — если отменил.
-     */
-    private boolean confirmAndExit() {
+    public boolean confirmAndExit() {
         int option = JOptionPane.showOptionDialog(
                 this,
                 "Вы уверены, что хотите выйти?",
@@ -153,10 +90,22 @@ public class MainApplicationFrame extends JFrame {
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null,
-                new Object[]{"Да", "Нет"}, // Текст на кнопках
-                "Нет" // Кнопка по умолчанию
+                new Object[]{"Да", "Нет"},
+                "Нет"
         );
 
         return option == JOptionPane.YES_OPTION;
+    }
+
+    private void fireApplicationExitEvent() {
+        support.firePropertyChange("ApplicationExit", false, true);
+    }
+
+    public void addApplicationExitListener(PropertyChangeListener listener) {
+        support.addPropertyChangeListener("ApplicationExit", listener);
+    }
+
+    public void removeApplicationExitListener(PropertyChangeListener listener) {
+        support.removePropertyChangeListener("ApplicationExit", listener);
     }
 }
