@@ -2,7 +2,7 @@ package gui;
 import log.Logger;
 import javax.swing.*;
 import java.awt.event.KeyEvent;
-
+import java.awt.event.WindowEvent;
 public class MenuBarFactory {
 
     private final MainApplicationFrame frame;
@@ -31,9 +31,7 @@ public class MenuBarFactory {
 
         JMenuItem exitMenuItem = new JMenuItem("Выход", KeyEvent.VK_X);
         exitMenuItem.addActionListener((event) -> {
-            if (frame.confirmAndExit()) {
-                System.exit(0);
-            }
+                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
         });
         fileMenu.add(exitMenuItem);
 
