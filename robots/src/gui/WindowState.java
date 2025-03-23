@@ -3,25 +3,29 @@ package gui;
 import java.awt.Rectangle;
 
 public class WindowState {
-    private String windowId;
+    private String windowName; // Используем windowName вместо windowId
     private Rectangle bounds;
     private boolean isIcon;
 
-    public WindowState(String windowId, Rectangle bounds, boolean isIcon) {
-        this.windowId = windowId;
+    // Конструктор
+    public WindowState(String windowName, Rectangle bounds, boolean isIcon) {
+        this.windowName = windowName;
         this.bounds = bounds;
         this.isIcon = isIcon;
     }
 
-    public String getWindowId() {
-        return windowId;
+    // Геттер для windowName
+    public String getWindowName() {
+        return windowName; // Возвращаем windowName
     }
 
+    // Геттер для bounds
     public Rectangle getBounds() {
-        return bounds;
+        return bounds; // Возвращаем bounds
     }
 
+    // Геттер для isIcon
     public boolean isIcon() {
-        return isIcon;
+        return isIcon; // Возвращаем isIcon
     }
 }
