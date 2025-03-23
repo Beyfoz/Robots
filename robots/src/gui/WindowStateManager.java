@@ -2,6 +2,7 @@ package gui;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileWriter;
@@ -18,22 +19,18 @@ public class WindowStateManager {
         Map<String, WindowState> windowStates = new HashMap<>();
 
         for (JInternalFrame frame : desktopPane.getAllFrames()) {
-            String windowName = frame.getName();
-            if (windowName == null) {
-                System.err.println("Окно без имени: " + frame.getTitle());
-                continue;
-            }
+            String windowId = frame.getTitle();
             Rectangle bounds = frame.getBounds();
             boolean isIcon = frame.isIcon();
 
-            windowStates.put(windowName, new WindowState(windowName, bounds, isIcon));
+            windowStates.put(windowId, new WindowState(windowId, bounds, isIcon));
         }
 
         try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
             JSONArray jsonArray = new JSONArray();
             for (WindowState state : windowStates.values()) {
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("windowName", state.getWindowName());
+                jsonObject.put("windowId", state.getWindowId());
                 jsonObject.put("x", state.getBounds().x);
                 jsonObject.put("y", state.getBounds().y);
                 jsonObject.put("width", state.getBounds().width);
@@ -58,7 +55,7 @@ public class WindowStateManager {
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                String windowName = jsonObject.getString("windowName");
+                String windowId = jsonObject.getString("windowId");
                 int x = jsonObject.getInt("x");
                 int y = jsonObject.getInt("y");
                 int width = jsonObject.getInt("width");
@@ -66,7 +63,7 @@ public class WindowStateManager {
                 boolean isIcon = jsonObject.getBoolean("isIcon");
 
                 for (JInternalFrame frame : desktopPane.getAllFrames()) {
-                    if (windowName.equals(frame.getName())) {
+                    if (frame.getTitle().equals(windowId)) {
                         frame.setBounds(x, y, width, height);
                         try {
                             if (isIcon) {
