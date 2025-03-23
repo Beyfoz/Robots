@@ -1,6 +1,7 @@
 package gui;
 
 import log.Logger;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -75,7 +76,6 @@ public class MainApplicationFrame extends JFrame {
             SwingUtilities.updateComponentTreeUI(this);
         } catch (ClassNotFoundException | InstantiationException
                  | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
         }
     }
 
