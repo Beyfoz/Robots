@@ -28,6 +28,10 @@ public class MainApplicationFrame extends JFrame {
         gameWindow.setSize(400, 400);
         addWindow(gameWindow);
 
+        TestWindow testWindow = new TestWindow();
+        testWindow.setSize(500, 500);
+        addWindow(testWindow);
+
         setJMenuBar(new MenuBarFactory(this).createMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
