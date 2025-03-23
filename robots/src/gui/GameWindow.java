@@ -10,6 +10,8 @@ public class GameWindow extends JInternalFrame {
 
     public GameWindow() {
         super("Игровое поле", true, true, true, true);
+        setName("GameWindow");
+
         m_visualizer = new GameVisualizer();
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(m_visualizer, BorderLayout.CENTER);

@@ -1,19 +1,21 @@
 package gui;
 
+
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+
 import javax.swing.*;
 import java.awt.*;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
 public class WindowStateManager {
-    private static final String CONFIG_FILE = System.getProperty("user.home") + "/app_config.json";
+    private static final String CONFIG_FILE = System.getProperty("user.home") + "/app_config";
 
     public void saveWindowStates(JDesktopPane desktopPane) {
         Map<String, WindowState> windowStates = new HashMap<>();
@@ -26,6 +28,10 @@ public class WindowStateManager {
             windowStates.put(windowId, new WindowState(windowId, bounds, isIcon));
         }
 
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(CONFIG_FILE))) {
+            oos.writeObject(windowStates);
+          
         try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
             JSONArray jsonArray = new JSONArray();
             for (WindowState state : windowStates.values()) {
@@ -39,6 +45,7 @@ public class WindowStateManager {
                 jsonArray.put(jsonObject);
             }
             writer.write(jsonArray.toString());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -49,9 +56,18 @@ public class WindowStateManager {
             return;
         }
 
-        try {
-            String content = new String(Files.readAllBytes(Paths.get(CONFIG_FILE)));
-            JSONArray jsonArray = new JSONArray(content);
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(CONFIG_FILE))) {
+            @SuppressWarnings("unchecked")
+            Map<String, WindowState> windowStates = (Map<String, WindowState>) ois.readObject();
+
+
+            for (Map.Entry<String, WindowState> entry : windowStates.entrySet()) {
+                String windowName = entry.getKey();
+                WindowState state = entry.getValue();
+
+                for (JInternalFrame frame : desktopPane.getAllFrames()) {
+                    if (windowName.equals(frame.getName())) {
+                        frame.setBounds(state.getBounds());
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -65,8 +81,9 @@ public class WindowStateManager {
                 for (JInternalFrame frame : desktopPane.getAllFrames()) {
                     if (frame.getTitle().equals(windowId)) {
                         frame.setBounds(x, y, width, height);
+
                         try {
-                            if (isIcon) {
+                            if (state.isCollapsed()) {
                                 frame.setIcon(true);
                             }
                         } catch (java.beans.PropertyVetoException e) {
@@ -75,7 +92,7 @@ public class WindowStateManager {
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
