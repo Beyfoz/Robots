@@ -4,8 +4,6 @@ import java.awt.Rectangle;
 import java.io.Serializable;
 
 public class WindowState implements Serializable {
-    private static final long serialVersionUID = 1L;
-
     private String windowName;
     private Rectangle bounds;
     private boolean isCollapsed;
