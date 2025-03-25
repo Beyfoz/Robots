@@ -15,12 +15,6 @@ public class WindowState implements Serializable {
         this.isCollapsed = isCollapsed;
     }
 
-
-    public String getWindowName() {
-        return windowName;
-    }
-
-
     public Rectangle getBounds() {
         return bounds;
     }
