@@ -29,7 +29,7 @@ public class MainApplicationFrame extends JFrame {
         addWindow(gameWindow);
 
         TestWindow testWindow = new TestWindow();
-        testWindow.setSize(500, 500);
+        testWindow.setSize(350, 300);
         addWindow(testWindow);
 
         setJMenuBar(new MenuBarFactory(this).createMenuBar());
