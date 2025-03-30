@@ -2,7 +2,6 @@ package gui;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileWriter;
@@ -19,18 +18,22 @@ public class WindowStateManager {
         Map<String, WindowState> windowStates = new HashMap<>();
 
         for (JInternalFrame frame : desktopPane.getAllFrames()) {
-            String windowId = frame.getTitle();
+            String windowName = frame.getName();
+            if (windowName == null) {
+                System.err.println("Окно без имени: " + frame.getTitle());
+                continue;
+            }
             Rectangle bounds = frame.getBounds();
             boolean isIcon = frame.isIcon();
 
-            windowStates.put(windowId, new WindowState(windowId, bounds, isIcon));
+            windowStates.put(windowName, new WindowState(windowName, bounds, isIcon));
         }
 
         try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
             JSONArray jsonArray = new JSONArray();
             for (WindowState state : windowStates.values()) {
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("windowId", state.getWindowId());
+                jsonObject.put("windowName", state.getWindowName());
                 jsonObject.put("x", state.getBounds().x);
                 jsonObject.put("y", state.getBounds().y);
                 jsonObject.put("width", state.getBounds().width);
@@ -55,15 +58,16 @@ public class WindowStateManager {
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                String windowId = jsonObject.getString("windowId");
+                String windowName = jsonObject.getString("windowName");
                 int x = jsonObject.getInt("x");
                 int y = jsonObject.getInt("y");
                 int width = jsonObject.getInt("width");
                 int height = jsonObject.getInt("height");
-                boolean isIcon = jsonObject.getBoolean("isIcon");
+                // Default to false if isIcon is not present
+                boolean isIcon = jsonObject.optBoolean("isIcon", false);
 
                 for (JInternalFrame frame : desktopPane.getAllFrames()) {
-                    if (frame.getTitle().equals(windowId)) {
+                    if (windowName.equals(frame.getName())) {
                         frame.setBounds(x, y, width, height);
                         try {
                             if (isIcon) {

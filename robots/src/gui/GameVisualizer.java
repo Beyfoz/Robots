@@ -1,10 +1,6 @@
 package gui;
 
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -32,6 +28,7 @@ public class GameVisualizer extends JPanel {
     private static final double maxAngularVelocity = 0.001;
 
     public GameVisualizer() {
+        setPreferredSize(new Dimension(400, 400));
         m_timer.schedule(new TimerTask() {
             @Override
             public void run() {
