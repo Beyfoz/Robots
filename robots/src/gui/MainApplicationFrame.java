@@ -1,7 +1,6 @@
 package gui;
 
 import log.Logger;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -28,6 +27,10 @@ public class MainApplicationFrame extends JFrame {
         GameWindow gameWindow = new GameWindow();
         gameWindow.setSize(400, 400);
         addWindow(gameWindow);
+
+        TestWindow testWindow = new TestWindow();
+        testWindow.setSize(400, 400);
+        addWindow(testWindow);
 
         setJMenuBar(new MenuBarFactory(this).createMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -72,6 +75,7 @@ public class MainApplicationFrame extends JFrame {
             SwingUtilities.updateComponentTreeUI(this);
         } catch (ClassNotFoundException | InstantiationException
                  | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
         }
     }
 
