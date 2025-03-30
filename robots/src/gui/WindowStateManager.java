@@ -63,7 +63,8 @@ public class WindowStateManager {
                 int y = jsonObject.getInt("y");
                 int width = jsonObject.getInt("width");
                 int height = jsonObject.getInt("height");
-                boolean isIcon = jsonObject.getBoolean("isIcon");
+                // Default to false if isIcon is not present
+                boolean isIcon = jsonObject.optBoolean("isIcon", false);
 
                 for (JInternalFrame frame : desktopPane.getAllFrames()) {
                     if (windowName.equals(frame.getName())) {

@@ -20,6 +20,7 @@ public class MainApplicationFrame extends JFrame {
                 screenSize.height - inset * 2);
 
         setContentPane(desktopPane);
+        setVisible(true);
 
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
