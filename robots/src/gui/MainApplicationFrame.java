@@ -1,12 +1,10 @@
 package gui;
 
 import log.Logger;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 public class MainApplicationFrame extends JFrame {
@@ -22,26 +20,24 @@ public class MainApplicationFrame extends JFrame {
 
         setContentPane(desktopPane);
 
+        RobotModel robotModel = new RobotModel();
+
+        initWindows(robotModel);
+        initMenu();
+        initWindowListeners();
+    }
+
+    private void initWindows(RobotModel model) {
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
 
-        GameWindow gameWindow = new GameWindow();
-        gameWindow.setSize(400, 400);
+        GameWindow gameWindow = new GameWindow(model);
+        gameWindow.setSize(600, 500);
         addWindow(gameWindow);
 
-        setJMenuBar(new MenuBarFactory(this).createMenuBar());
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent windowEvent) {
-                if (confirmAndExit()) {
-                    windowStateManager.saveWindowStates(desktopPane);
-                    System.exit(0);
-                }
-            }
-        });
-
-        windowStateManager.loadWindowStates(desktopPane);
+        CoordinatesWindow coordinatesWindow = new CoordinatesWindow(model);
+        coordinatesWindow.setSize(300, 120);
+        addWindow(coordinatesWindow);
     }
 
     protected LogWindow createLogWindow() {
@@ -58,12 +54,31 @@ public class MainApplicationFrame extends JFrame {
         desktopPane.add(frame);
         frame.setVisible(true);
 
-        frame.addInternalFrameListener(new InternalFrameAdapter() {
+        frame.addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
             @Override
             public void internalFrameClosing(InternalFrameEvent e) {
-                e.getInternalFrame().dispose();
+                e.getInternalFrame().setVisible(false);
             }
         });
+    }
+
+    private void initMenu() {
+        setJMenuBar(new MenuBarFactory(this).createMenuBar());
+    }
+
+    private void initWindowListeners() {
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent windowEvent) {
+                if (confirmAndExit()) {
+                    windowStateManager.saveWindowStates(desktopPane);
+                    System.exit(0);
+                }
+            }
+        });
+
+        windowStateManager.loadWindowStates(desktopPane);
     }
 
     public void setLookAndFeel(String className) {
@@ -72,6 +87,7 @@ public class MainApplicationFrame extends JFrame {
             SwingUtilities.updateComponentTreeUI(this);
         } catch (ClassNotFoundException | InstantiationException
                  | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            Logger.error("Ошибка при установке Look and Feel: " + e.getMessage());
         }
     }
 
