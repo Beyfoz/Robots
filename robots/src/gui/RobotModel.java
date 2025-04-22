@@ -4,12 +4,7 @@ import java.awt.*;
 import java.util.Observable;
 
 public class RobotModel extends Observable {
-    private volatile double robotX = 100;
-    private volatile double robotY = 100;
-    private volatile double direction = 0;
-    private volatile int targetX = 150;
-    private volatile int targetY = 100;
-
+    private RobotState state;
 
     private static final double CRUISE_VELOCITY = 2.0;
     private static final double PRECISION_VELOCITY = 0.6;
@@ -19,51 +14,54 @@ public class RobotModel extends Observable {
     private static final double PRECISION_ZONE = 20.0;
     private static final double MIN_TARGET_DISTANCE = 5.0;
 
+    public RobotModel() {
+        this.state = new RobotState(100, 100, 0, 150, 100);
+    }
+
     public void update(Dimension bounds) {
-        double dx = targetX - robotX;
-        double dy = targetY - robotY;
+        double dx = state.targetX - state.robotX;
+        double dy = state.targetY - state.robotY;
         double distance = Math.hypot(dx, dy);
 
-
         if (distance <= STOP_THRESHOLD) {
-            robotX = targetX;
-            robotY = targetY;
-            setChanged();
+            state = new RobotState(state.targetX, state.targetY, state.direction, state.targetX, state.targetY);
             notifyObservers();
             return;
         }
 
-        double velocity = distance > PRECISION_ZONE ?
-                CRUISE_VELOCITY : PRECISION_VELOCITY;
-
+        double velocity = distance > PRECISION_ZONE ? CRUISE_VELOCITY : PRECISION_VELOCITY;
         double targetAngle = Math.atan2(dy, dx);
+
+        double newDirection;
         if (distance < INSTANT_TURN_ZONE) {
-            direction = targetAngle;
+            newDirection = targetAngle;
         } else {
-            double angleDiff = normalizeAngle(targetAngle - direction);
+            double angleDiff = normalizeAngle(targetAngle - state.direction);
             double angularVelocity = Math.signum(angleDiff) *
                     Math.min(Math.abs(angleDiff)/2, MAX_ANGULAR_VELOCITY);
-            direction = normalizeAngle(direction + angularVelocity);
+            newDirection = normalizeAngle(state.direction + angularVelocity);
         }
 
+        double newRobotX = state.robotX + velocity * Math.cos(newDirection);
+        double newRobotY = state.robotY + velocity * Math.sin(newDirection);
 
-        robotX += velocity * Math.cos(direction);
-        robotY += velocity * Math.sin(direction);
+        // Проверка границ
+        newRobotX = Math.max(15, Math.min(newRobotX, bounds.width - 15));
+        newRobotY = Math.max(15, Math.min(newRobotY, bounds.height - 15));
 
-        //границы
-        robotX = Math.max(15, Math.min(robotX, bounds.width - 15));
-        robotY = Math.max(15, Math.min(robotY, bounds.height - 15));
-
+        state = new RobotState(newRobotX, newRobotY, newDirection, state.targetX, state.targetY);
         setChanged();
         notifyObservers();
     }
 
     public void setTargetPosition(Point p, Dimension bounds) {
-        double newDist = Math.hypot(p.x - robotX, p.y - robotY);
+        double newDist = Math.hypot(p.x - state.robotX, p.y - state.robotY);
         if (newDist < MIN_TARGET_DISTANCE) return;
-        //границы
-        targetX = Math.max(1, Math.min(p.x, bounds.width - 1));
-        targetY = Math.max(1, Math.min(p.y, bounds.height - 1));
+
+        int newTargetX = Math.max(1, Math.min(p.x, bounds.width - 1));
+        int newTargetY = Math.max(1, Math.min(p.y, bounds.height - 1));
+
+        state = new RobotState(state.robotX, state.robotY, state.direction, newTargetX, newTargetY);
         setChanged();
         notifyObservers();
     }
@@ -74,9 +72,7 @@ public class RobotModel extends Observable {
         return angle;
     }
 
-    public double getRobotX() { return robotX; }
-    public double getRobotY() { return robotY; }
-    public double getDirection() { return direction; }
-    public int getTargetX() { return targetX; }
-    public int getTargetY() { return targetY; }
+    public RobotState getState() {
+        return state;
+    }
 }

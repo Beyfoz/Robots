@@ -28,18 +28,18 @@ public class CoordinatesWindow extends JInternalFrame implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         if (o instanceof RobotModel) {
-            RobotModel model = (RobotModel)o;
-            SwingUtilities.invokeLater(() -> updateCoordinates(model));
+            RobotState state = ((RobotModel)o).getState();
+            SwingUtilities.invokeLater(() -> updateCoordinates(state));
         }
     }
 
-    private void updateCoordinates(RobotModel model) {
+    private void updateCoordinates(RobotState state) {
         String text = String.format("<html><center>Робот: (%.1f, %.1f)<br>Цель: (%d, %d)<br>Направление: %.2f°</center></html>",
-                model.getRobotX(),
-                model.getRobotY(),
-                model.getTargetX(),
-                model.getTargetY(),
-                Math.toDegrees(model.getDirection()));
+                state.robotX,
+                state.robotY,
+                state.targetX,
+                state.targetY,
+                Math.toDegrees(state.direction));
 
         coordinatesLabel.setText(text);
     }

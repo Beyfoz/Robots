@@ -7,15 +7,21 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
 public class GameVisualizer extends JPanel {
-    private final RobotModel model;
+    private RobotState state;
     private final Timer timer;
     private static final int MARGIN = 20;
 
     public GameVisualizer(RobotModel model) {
-        this.model = model;
+        this.state = model.getState();
         this.timer = new Timer(10, e -> {
             model.update(getSize());
             repaint();
+        });
+
+        model.addObserver((o, arg) -> {
+            if (o instanceof RobotModel) {
+                this.state = ((RobotModel) o).getState();
+            }
         });
 
         setDoubleBuffered(true);
@@ -48,8 +54,8 @@ public class GameVisualizer extends JPanel {
         g2d.setColor(new Color(240, 240, 240));
         g2d.drawRect(MARGIN, MARGIN, getWidth() - 2*MARGIN, getHeight() - 2*MARGIN);
 
-        drawRobot(g2d, (int)model.getRobotX(), (int)model.getRobotY(), model.getDirection());
-        drawTarget(g2d, model.getTargetX(), model.getTargetY());
+        drawRobot(g2d, (int)state.robotX, (int)state.robotY, state.direction);
+        drawTarget(g2d, state.targetX, state.targetY);
     }
 
     private void drawRobot(Graphics2D g, int x, int y, double direction) {
