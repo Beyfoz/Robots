@@ -1,27 +1,25 @@
 package gui;
 
 import java.awt.Rectangle;
+import java.io.Serializable;
 
-public class WindowState {
-    private String windowId;
+public class WindowState implements Serializable {
+    private String windowName;
     private Rectangle bounds;
-    private boolean isIcon;
+    private boolean isCollapsed;
 
-    public WindowState(String windowId, Rectangle bounds, boolean isIcon) {
-        this.windowId = windowId;
+
+    public WindowState(String windowName, Rectangle bounds, boolean isCollapsed) {
+        this.windowName = windowName;
         this.bounds = bounds;
-        this.isIcon = isIcon;
-    }
-
-    public String getWindowId() {
-        return windowId;
+        this.isCollapsed = isCollapsed;
     }
 
     public Rectangle getBounds() {
         return bounds;
     }
 
-    public boolean isIcon() {
-        return isIcon;
+    public boolean isCollapsed() {
+        return isCollapsed;
     }
 }

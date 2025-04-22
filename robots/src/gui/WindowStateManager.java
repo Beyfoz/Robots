@@ -1,44 +1,33 @@
 package gui;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import javax.swing.*;
 import java.awt.*;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
 public class WindowStateManager {
-    private static final String CONFIG_FILE = System.getProperty("user.home") + "/app_config.json";
+    private static final String CONFIG_FILE = System.getProperty("user.home") + "/app_config";
 
     public void saveWindowStates(JDesktopPane desktopPane) {
         Map<String, WindowState> windowStates = new HashMap<>();
 
         for (JInternalFrame frame : desktopPane.getAllFrames()) {
-            String windowId = frame.getTitle();
+            String windowName = frame.getName();
+            if (windowName == null) {
+                System.err.println("Окно без имени: " + frame.getTitle());
+                continue;
+            }
             Rectangle bounds = frame.getBounds();
             boolean isIcon = frame.isIcon();
 
-            windowStates.put(windowId, new WindowState(windowId, bounds, isIcon));
+            windowStates.put(windowName, new WindowState(windowName, bounds, isIcon));
         }
 
-        try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
-            JSONArray jsonArray = new JSONArray();
-            for (WindowState state : windowStates.values()) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("windowId", state.getWindowId());
-                jsonObject.put("x", state.getBounds().x);
-                jsonObject.put("y", state.getBounds().y);
-                jsonObject.put("width", state.getBounds().width);
-                jsonObject.put("height", state.getBounds().height);
-                jsonObject.put("isIcon", state.isIcon());
-                jsonArray.put(jsonObject);
-            }
-            writer.write(jsonArray.toString());
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(CONFIG_FILE))) {
+            oos.writeObject(windowStates);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -49,24 +38,19 @@ public class WindowStateManager {
             return;
         }
 
-        try {
-            String content = new String(Files.readAllBytes(Paths.get(CONFIG_FILE)));
-            JSONArray jsonArray = new JSONArray(content);
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(CONFIG_FILE))) {
+            @SuppressWarnings("unchecked")
+            Map<String, WindowState> windowStates = (Map<String, WindowState>) ois.readObject();
 
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                String windowId = jsonObject.getString("windowId");
-                int x = jsonObject.getInt("x");
-                int y = jsonObject.getInt("y");
-                int width = jsonObject.getInt("width");
-                int height = jsonObject.getInt("height");
-                boolean isIcon = jsonObject.getBoolean("isIcon");
+            for (Map.Entry<String, WindowState> entry : windowStates.entrySet()) {
+                String windowName = entry.getKey();
+                WindowState state = entry.getValue();
 
                 for (JInternalFrame frame : desktopPane.getAllFrames()) {
-                    if (frame.getTitle().equals(windowId)) {
-                        frame.setBounds(x, y, width, height);
+                    if (windowName.equals(frame.getName())) {
+                        frame.setBounds(state.getBounds());
                         try {
-                            if (isIcon) {
+                            if (state.isCollapsed()) {
                                 frame.setIcon(true);
                             }
                         } catch (java.beans.PropertyVetoException e) {
@@ -75,7 +59,7 @@ public class WindowStateManager {
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
