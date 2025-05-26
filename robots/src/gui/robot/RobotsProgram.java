@@ -1,4 +1,6 @@
-package gui;
+package gui.robot;
+
+import gui.components.MainApplicationFrame;
 
 import java.awt.Frame;
 import javax.swing.SwingUtilities;

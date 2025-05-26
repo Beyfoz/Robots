@@ -1,4 +1,4 @@
-package gui;
+package gui.robot;
 
 import java.io.Serializable;
 

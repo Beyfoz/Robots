@@ -1,4 +1,7 @@
-package gui;
+package gui.components;
+
+import gui.robot.RobotModel;
+import gui.visualization.GameVisualizer;
 
 import javax.swing.*;
 import java.util.ResourceBundle;

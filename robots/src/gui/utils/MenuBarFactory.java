@@ -1,5 +1,6 @@
-package gui;
+package gui.utils;
 
+import gui.components.MainApplicationFrame;
 import log.Logger;
 import javax.swing.*;
 import java.awt.event.KeyEvent;

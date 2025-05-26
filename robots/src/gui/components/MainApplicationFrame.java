@@ -1,5 +1,8 @@
-package gui;
+package gui.components;
 
+import gui.utils.MenuBarFactory;
+import gui.robot.RobotModel;
+import gui.utils.WindowStateManager;
 import log.Logger;
 import javax.swing.*;
 import java.awt.*;

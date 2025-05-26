@@ -1,4 +1,4 @@
-package gui;
+package gui.utils;
 
 import java.awt.Rectangle;
 import java.io.Serializable;

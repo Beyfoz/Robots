@@ -1,4 +1,7 @@
-package gui;
+package gui.visualization;
+
+import gui.robot.RobotModel;
+import gui.robot.RobotState;
 
 import javax.swing.*;
 import java.awt.*;

@@ -44,7 +44,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>gui.RobotsProgram</mainClass>
+                            <mainClass>gui.robot.RobotsProgram</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
