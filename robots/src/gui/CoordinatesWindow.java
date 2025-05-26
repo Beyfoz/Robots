@@ -4,12 +4,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.ResourceBundle;
 
 public class CoordinatesWindow extends JInternalFrame implements Observer {
     private final JLabel coordinatesLabel;
+    private ResourceBundle messages;
 
     public CoordinatesWindow(RobotModel model) {
-        super("Координаты робота", true, true, true, true);
+        super(ResourceBundle.getBundle("gui.messages").getString("coordinates.window.title"), true, true, true, true);
+        messages = ResourceBundle.getBundle("gui.messages");
         model.addObserver(this);
         setName("CoordinatesWindow");
 
@@ -25,22 +28,25 @@ public class CoordinatesWindow extends JInternalFrame implements Observer {
         setLocation(650, 10);
     }
 
+    public void updateTitle(String title) {
+        setTitle(title);
+    }
+
     @Override
     public void update(Observable o, Object arg) {
-        if (o instanceof RobotModel) {
-            RobotState state = ((RobotModel)o).getState();
+        if (arg instanceof RobotState) {
+            RobotState state = (RobotState) arg;
             SwingUtilities.invokeLater(() -> updateCoordinates(state));
         }
     }
 
     private void updateCoordinates(RobotState state) {
-        String text = String.format("<html><center>Робот: (%.1f, %.1f)<br>Цель: (%d, %d)<br>Направление: %.2f°</center></html>",
+        String text = String.format(messages.getString("coordinates.format"),
                 state.robotX,
                 state.robotY,
                 state.targetX,
                 state.targetY,
                 Math.toDegrees(state.direction));
-
         coordinatesLabel.setText(text);
     }
 }

@@ -1,10 +1,11 @@
 package gui;
 
 import javax.swing.*;
+import java.util.ResourceBundle;
 
 public class GameWindow extends JInternalFrame {
     public GameWindow(RobotModel model) {
-        super("Игровое поле", true, true, true, true);
+        super(ResourceBundle.getBundle("gui.messages").getString("game.window.title"), true, true, true, true);
         setName("GameWindow");
         GameVisualizer visualizer = new GameVisualizer(model);
         add(visualizer);
@@ -12,5 +13,9 @@ public class GameWindow extends JInternalFrame {
         setSize(600, 500);
         setLocation(10, 10);
         setDefaultCloseOperation(HIDE_ON_CLOSE);
+    }
+
+    public void updateTitle(String title) {
+        setTitle(title);
     }
 }

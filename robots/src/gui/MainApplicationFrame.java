@@ -6,12 +6,18 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.event.InternalFrameEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final WindowStateManager windowStateManager = new WindowStateManager();
+    private Locale currentLocale = Locale.getDefault();
+    private ResourceBundle messages;
 
     public MainApplicationFrame() {
+        messages = ResourceBundle.getBundle("gui.messages", currentLocale);
+        setTitle(messages.getString("main.title"));
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds(inset, inset,
@@ -25,6 +31,30 @@ public class MainApplicationFrame extends JFrame {
         initWindows(robotModel);
         initMenu();
         initWindowListeners();
+    }
+
+    public Locale getCurrentLocale() {
+        return currentLocale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.currentLocale = locale;
+        this.messages = ResourceBundle.getBundle("gui.messages", currentLocale);
+        setTitle(messages.getString("main.title"));
+    }
+
+    public void refreshUI() {
+        setJMenuBar(new MenuBarFactory(this).createMenuBar());
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            if (frame instanceof LogWindow) {
+                ((LogWindow) frame).updateTitle(messages.getString("log.window.title"));
+            } else if (frame instanceof CoordinatesWindow) {
+                ((CoordinatesWindow) frame).updateTitle(messages.getString("coordinates.window.title"));
+            } else if (frame instanceof GameWindow) {
+                ((GameWindow) frame).updateTitle(messages.getString("game.window.title"));
+            }
+        }
+        SwingUtilities.updateComponentTreeUI(this);
     }
 
     private void initWindows(RobotModel model) {
@@ -46,7 +76,7 @@ public class MainApplicationFrame extends JFrame {
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
         logWindow.pack();
-        Logger.debug("Протокол работает");
+        Logger.debug(messages.getString("log.test_message"));
         return logWindow;
     }
 
@@ -87,7 +117,7 @@ public class MainApplicationFrame extends JFrame {
             SwingUtilities.updateComponentTreeUI(this);
         } catch (ClassNotFoundException | InstantiationException
                  | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            Logger.error("Ошибка при установке Look and Feel: " + e.getMessage());
+            Logger.error(String.format(messages.getString("log.error_laf"), e.getMessage()));
         }
     }
 

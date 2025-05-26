@@ -7,9 +7,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 public class WindowStateManager {
     private static final String CONFIG_FILE = System.getProperty("user.home") + "/app_config";
+    private final ResourceBundle messages;
+
+    public WindowStateManager() {
+        this.messages = ResourceBundle.getBundle("gui.messages");
+    }
 
     public void saveWindowStates(JDesktopPane desktopPane) {
         Map<String, WindowState> windowStates = new HashMap<>();
@@ -17,7 +23,7 @@ public class WindowStateManager {
         for (JInternalFrame frame : desktopPane.getAllFrames()) {
             String windowName = frame.getName();
             if (windowName == null) {
-                System.err.println("Окно без имени: " + frame.getTitle());
+                System.err.println(String.format(messages.getString("windowstate.error.no_name"), frame.getTitle()));
                 continue;
             }
             Rectangle bounds = frame.getBounds();

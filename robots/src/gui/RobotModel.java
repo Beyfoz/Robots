@@ -2,9 +2,12 @@ package gui;
 
 import java.awt.*;
 import java.util.Observable;
+import javax.swing.Timer;
 
 public class RobotModel extends Observable {
     private RobotState state;
+    private RobotState lastPublishedState;
+    private final Timer updateTimer;
 
     private static final double CRUISE_VELOCITY = 2.0;
     private static final double PRECISION_VELOCITY = 0.6;
@@ -16,6 +19,13 @@ public class RobotModel extends Observable {
 
     public RobotModel() {
         this.state = new RobotState(100, 100, 0, 150, 100);
+        this.lastPublishedState = state;
+
+
+        this.updateTimer = new Timer(40, e -> {
+            update(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        });
+        updateTimer.start();
     }
 
     public void update(Dimension bounds) {
@@ -25,7 +35,7 @@ public class RobotModel extends Observable {
 
         if (distance <= STOP_THRESHOLD) {
             state = new RobotState(state.targetX, state.targetY, state.direction, state.targetX, state.targetY);
-            notifyObservers();
+            notifyIfChanged();
             return;
         }
 
@@ -50,8 +60,15 @@ public class RobotModel extends Observable {
         newRobotY = Math.max(15, Math.min(newRobotY, bounds.height - 15));
 
         state = new RobotState(newRobotX, newRobotY, newDirection, state.targetX, state.targetY);
-        setChanged();
-        notifyObservers();
+        notifyIfChanged();
+    }
+
+    private void notifyIfChanged() {
+        if (!state.equals(lastPublishedState)) {
+            lastPublishedState = state;
+            setChanged();
+            notifyObservers(state);
+        }
     }
 
     public void setTargetPosition(Point p, Dimension bounds) {
@@ -62,8 +79,7 @@ public class RobotModel extends Observable {
         int newTargetY = Math.max(1, Math.min(p.y, bounds.height - 1));
 
         state = new RobotState(state.robotX, state.robotY, state.direction, newTargetX, newTargetY);
-        setChanged();
-        notifyObservers();
+        notifyIfChanged();
     }
 
     private double normalizeAngle(double angle) {
@@ -72,7 +88,7 @@ public class RobotModel extends Observable {
         return angle;
     }
 
-    public RobotState getState() {
+    public RobotState getCurrentState() {
         return state;
     }
 }

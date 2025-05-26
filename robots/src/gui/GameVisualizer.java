@@ -7,20 +7,18 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
 public class GameVisualizer extends JPanel {
-    private RobotState state;
-    private final Timer timer;
+    private RobotState currentState;
+    private final Timer renderTimer;
     private static final int MARGIN = 20;
 
     public GameVisualizer(RobotModel model) {
-        this.state = model.getState();
-        this.timer = new Timer(10, e -> {
-            model.update(getSize());
-            repaint();
-        });
+        this.currentState = model.getCurrentState();
+
+        this.renderTimer = new Timer(16, e -> repaint());
 
         model.addObserver((o, arg) -> {
-            if (o instanceof RobotModel) {
-                this.state = ((RobotModel) o).getState();
+            if (arg instanceof RobotState) {
+                this.currentState = (RobotState) arg;
             }
         });
 
@@ -34,8 +32,9 @@ public class GameVisualizer extends JPanel {
             }
         });
 
-        timer.start();
+        renderTimer.start();
     }
+
 
     private Point convertMouseToGameCoords(Point mousePoint) {
         int x = Math.max(MARGIN, Math.min(mousePoint.x, getWidth() - MARGIN));
@@ -44,8 +43,8 @@ public class GameVisualizer extends JPanel {
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    public void paint(Graphics g) {
+        super.paint(g);
         Graphics2D g2d = (Graphics2D)g;
 
         g2d.setColor(Color.WHITE);
@@ -54,8 +53,10 @@ public class GameVisualizer extends JPanel {
         g2d.setColor(new Color(240, 240, 240));
         g2d.drawRect(MARGIN, MARGIN, getWidth() - 2*MARGIN, getHeight() - 2*MARGIN);
 
-        drawRobot(g2d, (int)state.robotX, (int)state.robotY, state.direction);
-        drawTarget(g2d, state.targetX, state.targetY);
+        if (currentState != null) {
+            drawRobot(g2d, (int)currentState.robotX, (int)currentState.robotY, currentState.direction);
+            drawTarget(g2d, currentState.targetX, currentState.targetY);
+        }
     }
 
     private void drawRobot(Graphics2D g, int x, int y, double direction) {
