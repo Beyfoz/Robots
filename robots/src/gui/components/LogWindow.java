@@ -1,22 +1,22 @@
-package gui;
+package gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.TextArea;
-
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
-
 import log.LogChangeListener;
 import log.LogEntry;
 import log.LogWindowSource;
+import java.util.ResourceBundle;
 
 public class LogWindow extends JInternalFrame implements LogChangeListener {
     private LogWindowSource m_logSource;
     private TextArea m_logContent;
 
     public LogWindow(LogWindowSource logSource) {
-        super("Протокол работы", true, true, true, true);
+        super(ResourceBundle.getBundle("gui.messages").getString("log.window.title"), true, true, true, true);
+        setName("LogWindow");
         m_logSource = logSource;
         m_logSource.registerListener(this);
         m_logContent = new TextArea("");
@@ -27,6 +27,10 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
         getContentPane().add(panel);
         pack();
         updateLogContent();
+    }
+
+    public void updateTitle(String title) {
+        setTitle(title);
     }
 
     private void updateLogContent() {
